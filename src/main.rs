@@ -10,6 +10,7 @@ fn main() {
     let _roman_numbers = roman_numbers("MCMXCIV".to_string());
     let _length_of_last_word = length_of_last_word("    day".to_string());
     let _is_subsequence = is_subsequence("bb".to_string(), "ahbgdc".to_string());
+    let _tow_sum = two_sum(vec![2, 7, 11, 15], 9);
 }
 
 fn test_this(str: &str) -> String {
@@ -179,6 +180,30 @@ fn is_subsequence(s: String, t: String) -> bool {
     index >= s.len()
 }
 
+fn two_sum(numbers: Vec<i32>, target: i32) -> Vec<i32> {
+    let mut left: usize = 0;
+    let mut right: usize = numbers.len() - 1;
+    let mut sum: i32;
+
+    loop {
+        sum = numbers[left] + numbers[right];
+
+        if sum == target {
+            break;
+        }
+
+        if sum < target {
+            left += 1;
+        }
+
+        if sum > target {
+            right -= 1;
+        }
+    }
+
+    vec![left as i32 + 1, right as i32 + 1]
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -298,5 +323,24 @@ mod tests {
         assert_eq!(result, 5);
         assert_eq!(result_two, 4);
         assert_eq!(result_three, 3);
+    }
+
+    #[test]
+    fn test_two_sum() {
+        let numbers = Vec::from([2, 7, 11, 15]);
+        let target = 9;
+        let result = two_sum(numbers, target);
+
+        let numbers_2 = Vec::from([2, 3, 4]);
+        let target_2 = 6;
+        let result_2 = two_sum(numbers_2, target_2);
+
+        let numbers_3 = Vec::from([-1, 0]);
+        let target_3 = -1;
+        let result_3 = two_sum(numbers_3, target_3);
+
+        assert_eq!(result, vec![1, 2]);
+        assert_eq!(result_2, vec![1, 3]);
+        assert_eq!(result_3, vec![1, 2]);
     }
 }
