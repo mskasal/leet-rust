@@ -11,6 +11,7 @@ fn main() {
     let _length_of_last_word = length_of_last_word("    day".to_string());
     let _is_subsequence = is_subsequence("bb".to_string(), "ahbgdc".to_string());
     let _tow_sum = two_sum(vec![2, 7, 11, 15], 9);
+    let _max_area = max_area(vec![1, 8, 6, 2, 5, 4, 8, 3, 7]);
 }
 
 fn test_this(str: &str) -> String {
@@ -204,6 +205,31 @@ fn two_sum(numbers: Vec<i32>, target: i32) -> Vec<i32> {
     vec![left as i32 + 1, right as i32 + 1]
 }
 
+fn max_area(height: Vec<i32>) -> i32 {
+    let mut left: usize = 0;
+    let mut right: usize = height.len() - 1;
+    let mut max_area: i32 = 0;
+
+    loop {
+        let area = (right - left) as i32 * height[left].min(height[right]);
+
+        if max_area < area {
+            max_area = area;
+        }
+
+        if height[left] >= height[right] {
+            right -= 1;
+        } else {
+            left += 1;
+        }
+        if left >= right {
+            break;
+        }
+    }
+
+    max_area
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -342,5 +368,17 @@ mod tests {
         assert_eq!(result, vec![1, 2]);
         assert_eq!(result_2, vec![1, 3]);
         assert_eq!(result_3, vec![1, 2]);
+    }
+
+    #[test]
+    fn test_max_area() {
+        let height = Vec::from([1, 8, 6, 2, 5, 4, 8, 3, 7]);
+        let result = max_area(height);
+
+        let height_1 = Vec::from([1, 1]);
+        let result_1 = max_area(height_1);
+
+        assert_eq!(result, 49);
+        assert_eq!(result_1, 1);
     }
 }
