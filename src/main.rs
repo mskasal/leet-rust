@@ -167,22 +167,16 @@ fn length_of_last_word(s: String) -> i32 {
 }
 
 fn is_subsequence(s: String, t: String) -> bool {
-    if s.len() > t.len() || s.len() == t.len() && s != t {
-        return false;
-    }
+    let mut index = 0;
 
-    let mut st = String::new();
-    let mut chars_iter = s.chars();
-
-    while let Some(char_s) = chars_iter.next() {
-        for char_t in t.chars() {
-            if char_s == char_t {
-                st.push(char_s);
+    for char_t in t.chars() {
+        if let Some(char_s) = s.chars().nth(index) {
+            if index < s.len() && char_s == char_t {
+                index += 1
             }
         }
     }
-
-    st == s
+    index >= s.len()
 }
 
 #[cfg(test)]
@@ -238,12 +232,16 @@ mod tests {
         let string2 = String::from("abhgdc");
         let string3 = String::from("axc");
         let string4 = String::from("abhgdc");
+        let string5 = String::from("bb");
+        let string6 = String::from("abhgdc");
 
         let result = is_subsequence(string1, string2);
         let result2 = is_subsequence(string3, string4);
+        let result3 = is_subsequence(string5, string6);
 
         assert!(result);
         assert!(!result2);
+        assert!(!result3);
     }
 
     #[test]
