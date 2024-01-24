@@ -1,4 +1,4 @@
-use std::{cmp, collections::HashMap};
+use std::{cmp, collections::HashMap, usize};
 
 fn main() {
     let _test_this = test_this("this is a str");
@@ -13,6 +13,7 @@ fn main() {
     let _tow_sum = two_sum(vec![2, 7, 11, 15], 9);
     let _max_area = max_area(vec![1, 8, 6, 2, 5, 4, 8, 3, 7]);
     let _three_sum = three_sum(vec![-1, 0, 1, 2, -1, -4]);
+    let _can_construct = can_construct("aa".to_string(), "aab".to_string());
 }
 
 fn test_this(str: &str) -> String {
@@ -257,7 +258,6 @@ fn three_sum(nums: Vec<i32>) -> Vec<Vec<i32>> {
 
         while left != right {
             while right > left {
-                println!("{i}{left}{right}");
                 let sum = nums[i] + nums[left] + nums[right];
                 if sum == 0 {
                     let mut triplet = vec![nums[i], nums[left], nums[right]];
@@ -271,6 +271,36 @@ fn three_sum(nums: Vec<i32>) -> Vec<Vec<i32>> {
             }
             right = nums.len() - 1;
             left += 1;
+        }
+    }
+
+    result
+}
+
+fn can_construct(ransom_note: String, magazine: String) -> bool {
+    let mut mag_char_map: HashMap<char, usize> = HashMap::new();
+    let mut result: bool = false;
+
+    if ransom_note.len() > magazine.len() {
+        return result;
+    }
+
+    for char_m in magazine.chars() {
+        *mag_char_map.entry(char_m).or_insert(0) += 1;
+    }
+
+    for char_r in ransom_note.chars() {
+        if let Some(ent) = mag_char_map.get_mut(&char_r) {
+            if *ent > 0 {
+                *ent -= 1;
+                result = true;
+            } else {
+                result = false;
+                break;
+            }
+        } else {
+            result = false;
+            break;
         }
     }
 
@@ -443,5 +473,25 @@ mod tests {
         assert_eq!(result, vec![vec![-1, -1, 2], vec![-1, 0, 1]]);
         assert_eq!(result_2, vec![[]]);
         assert_eq!(result_3, vec![[0, 0, 0]]);
+    }
+
+    #[test]
+    fn test_can_construct() {
+        let ransom_note = String::from("a");
+        let magazine = String::from("b");
+
+        let ransom_note_two = String::from("aa");
+        let magazine_two = String::from("ab");
+
+        let ransom_note_three = String::from("aa");
+        let magazine_three = String::from("aab");
+
+        let result = can_construct(ransom_note, magazine);
+        let result_two = can_construct(ransom_note_two, magazine_two);
+        let result_three = can_construct(ransom_note_three, magazine_three);
+
+        assert!(!result);
+        assert!(!result_two);
+        assert!(result_three);
     }
 }
