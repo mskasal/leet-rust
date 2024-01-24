@@ -12,6 +12,7 @@ fn main() {
     let _is_subsequence = is_subsequence("bb".to_string(), "ahbgdc".to_string());
     let _tow_sum = two_sum(vec![2, 7, 11, 15], 9);
     let _max_area = max_area(vec![1, 8, 6, 2, 5, 4, 8, 3, 7]);
+    let _three_sum = three_sum(vec![-1, 0, 1, 2, -1, -4]);
 }
 
 fn test_this(str: &str) -> String {
@@ -230,6 +231,52 @@ fn max_area(height: Vec<i32>) -> i32 {
     max_area
 }
 
+// TODO: optimize
+fn three_sum(nums: Vec<i32>) -> Vec<Vec<i32>> {
+    let mut result: Vec<Vec<i32>> = Vec::new();
+
+    let mut left: usize;
+    let mut right: usize;
+
+    if nums.len() < 3 {
+        return vec![vec![]];
+    }
+
+    if nums.len() == 3 {
+        let sum: i32 = nums.iter().sum();
+        if sum == 0 {
+            return vec![nums];
+        } else {
+            return vec![vec![]];
+        }
+    }
+
+    for i in 0..nums.len() - 1 {
+        left = i + 1;
+        right = nums.len() - 1;
+
+        while left != right {
+            while right > left {
+                println!("{i}{left}{right}");
+                let sum = nums[i] + nums[left] + nums[right];
+                if sum == 0 {
+                    let mut triplet = vec![nums[i], nums[left], nums[right]];
+                    triplet.sort();
+                    if !result.contains(&triplet) {
+                        result.insert(0, triplet);
+                    }
+                }
+
+                right -= 1;
+            }
+            right = nums.len() - 1;
+            left += 1;
+        }
+    }
+
+    result
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -336,6 +383,7 @@ mod tests {
         assert_eq!(result_two, 58);
         assert_eq!(result_three, 1994);
     }
+
     #[test]
     fn test_length_of_last_word() {
         let sentence = "Hellow world".to_string();
@@ -380,5 +428,20 @@ mod tests {
 
         assert_eq!(result, 49);
         assert_eq!(result_1, 1);
+    }
+
+    #[test]
+    fn test_three_sum() {
+        let nums = Vec::from([-1, 0, 1, 2, -1, -4]);
+        let nums_2 = Vec::from([0, 1, 1]);
+        let nums_3 = Vec::from([0, 0, 0]);
+
+        let result = three_sum(nums);
+        let result_2 = three_sum(nums_2);
+        let result_3 = three_sum(nums_3);
+
+        assert_eq!(result, vec![vec![-1, -1, 2], vec![-1, 0, 1]]);
+        assert_eq!(result_2, vec![[]]);
+        assert_eq!(result_3, vec![[0, 0, 0]]);
     }
 }
