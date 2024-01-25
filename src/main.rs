@@ -15,6 +15,7 @@ fn main() {
     let _three_sum = three_sum(vec![-1, 0, 1, 2, -1, -4]);
     let _can_construct = can_construct("aa".to_string(), "aab".to_string());
     let _is_isomorphic = is_isomorphic("egg".to_string(), "add".to_string());
+    let _word_pattern = word_pattern("abba".to_string(), "dog cat cat dog".to_string());
 }
 
 fn test_this(str: &str) -> String {
@@ -354,8 +355,45 @@ fn is_isomorphic(s: String, t: String) -> bool {
     result
 }
 
+fn word_pattern(pattern: String, s: String) -> bool {
+    let words: Vec<&str> = s.split(" ").collect();
+
+    if words.len() != pattern.len() {
+        return false;
+    }
+
+    let mut p_map: HashMap<char, &str> = HashMap::new();
+    let mut s_map: HashMap<&str, char> = HashMap::new();
+    let mut result = true;
+
+    for i in 0..pattern.len() {
+        if let Some(p_char) = pattern.chars().nth(i) {
+            if p_map.contains_key(&p_char) {
+                if p_map[&p_char] != words[i] {
+                    result = false;
+                    break;
+                }
+            } else {
+                p_map.insert(p_char, words[i]);
+            }
+
+            if s_map.contains_key(&words[i]) {
+                if s_map[words[i]] != p_char {
+                    result = false;
+                    break;
+                }
+            } else {
+                s_map.insert(words[i], p_char);
+            }
+        }
+    }
+
+    result
+}
+
 #[cfg(test)]
 mod tests {
+
     use super::*;
 
     #[test]
@@ -570,5 +608,25 @@ mod tests {
         assert!(result_three);
         assert!(!result_fourth);
         assert!(!result_fifth);
+    }
+
+    #[test]
+    fn test_word_pattern() {
+        let pattern = String::from("abba");
+        let s = String::from("dog cat cat dog");
+
+        let pattern_two = String::from("abba");
+        let s_two = String::from("dog cat cat fish");
+
+        let pattern_three = String::from("abba");
+        let s_three = String::from("dog dog dog dog");
+
+        let result = word_pattern(pattern, s);
+        let result_two = word_pattern(pattern_two, s_two);
+        let result_three = word_pattern(pattern_three, s_three);
+
+        assert!(result);
+        assert!(!result_two);
+        assert!(!result_three);
     }
 }
