@@ -14,6 +14,7 @@ fn main() {
     let _max_area = max_area(vec![1, 8, 6, 2, 5, 4, 8, 3, 7]);
     let _three_sum = three_sum(vec![-1, 0, 1, 2, -1, -4]);
     let _can_construct = can_construct("aa".to_string(), "aab".to_string());
+    let _is_isomorphic = is_isomorphic("egg".to_string(), "add".to_string());
 }
 
 fn test_this(str: &str) -> String {
@@ -232,13 +233,7 @@ fn max_area(height: Vec<i32>) -> i32 {
     max_area
 }
 
-// TODO: optimize
 fn three_sum(nums: Vec<i32>) -> Vec<Vec<i32>> {
-    let mut result: Vec<Vec<i32>> = Vec::new();
-
-    let mut left: usize;
-    let mut right: usize;
-
     if nums.len() < 3 {
         return vec![vec![]];
     }
@@ -252,25 +247,47 @@ fn three_sum(nums: Vec<i32>) -> Vec<Vec<i32>> {
         }
     }
 
-    for i in 0..nums.len() - 1 {
+    let mut result: Vec<Vec<i32>> = Vec::new();
+    let mut nums_sorted = nums.clone();
+    nums_sorted.sort();
+
+    let mut left: usize;
+    let mut right: usize;
+
+    for i in 0..nums_sorted.len() - 2 {
         left = i + 1;
-        right = nums.len() - 1;
+        right = nums_sorted.len() - 1;
 
-        while left != right {
-            while right > left {
-                let sum = nums[i] + nums[left] + nums[right];
-                if sum == 0 {
-                    let mut triplet = vec![nums[i], nums[left], nums[right]];
-                    triplet.sort();
-                    if !result.contains(&triplet) {
-                        result.insert(0, triplet);
-                    }
+        let target = -nums_sorted[i];
+
+        loop {
+            if left >= right {
+                break;
+            }
+            if nums_sorted[right] == nums[right - 1] {
+                right -= 1;
+                continue;
+            }
+            if nums_sorted[left] == nums[left + 1] {
+                left += 1;
+                continue;
+            }
+            let sum = nums_sorted[left] + nums_sorted[right];
+
+            if sum == target {
+                if !result.contains(&vec![nums_sorted[i], nums_sorted[left], nums_sorted[right]]) {
+                    result.push(vec![nums_sorted[i], nums_sorted[left], nums_sorted[right]]);
                 }
-
                 right -= 1;
             }
-            right = nums.len() - 1;
-            left += 1;
+
+            if sum < target {
+                left += 1;
+            }
+
+            if sum > target {
+                right -= 1;
+            }
         }
     }
 
@@ -301,6 +318,36 @@ fn can_construct(ransom_note: String, magazine: String) -> bool {
         } else {
             result = false;
             break;
+        }
+    }
+
+    result
+}
+
+fn is_isomorphic(s: String, t: String) -> bool {
+    if s.len() != t.len() {
+        return false;
+    }
+
+    let mut result = true;
+    let mut s_map: HashMap<char, char> = HashMap::new();
+
+    for i in 0..s.len() {
+        if let Some(s_char) = s.chars().nth(i) {
+            if let Some(t_char) = t.chars().nth(i) {
+                if s_map.contains_key(&s_char) {
+                    if s_map[&s_char] != t_char {
+                        result = false;
+                        break;
+                    }
+                } else {
+                    if s_map.values().any(|&v| v == t_char) {
+                        result = false;
+                        break;
+                    }
+                    s_map.insert(s_char, t_char);
+                }
+            }
         }
     }
 
@@ -493,5 +540,35 @@ mod tests {
         assert!(!result);
         assert!(!result_two);
         assert!(result_three);
+    }
+
+    #[test]
+    fn test_is_isomorphic() {
+        let s = String::from("egg");
+        let t = String::from("add");
+
+        let s_two = String::from("foo");
+        let t_two = String::from("bar");
+
+        let s_three = String::from("paper");
+        let t_three = String::from("title");
+
+        let s_fourth = String::from("bbbaaaba");
+        let t_fourth = String::from("aaabbbba");
+
+        let s_fifth = String::from("badc");
+        let t_fifth = String::from("baba");
+
+        let result = is_isomorphic(s, t);
+        let result_two = is_isomorphic(s_two, t_two);
+        let result_three = is_isomorphic(s_three, t_three);
+        let result_fourth = is_isomorphic(s_fourth, t_fourth);
+        let result_fifth = is_isomorphic(s_fifth, t_fifth);
+
+        assert!(result);
+        assert!(!result_two);
+        assert!(result_three);
+        assert!(!result_fourth);
+        assert!(!result_fifth);
     }
 }
