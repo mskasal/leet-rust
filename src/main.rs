@@ -16,6 +16,8 @@ fn main() {
     let _can_construct = can_construct("aa".to_string(), "aab".to_string());
     let _is_isomorphic = is_isomorphic("egg".to_string(), "add".to_string());
     let _word_pattern = word_pattern("abba".to_string(), "dog cat cat dog".to_string());
+    let _is_anagram = is_anagram("anagram".to_string(), "nagaram".to_string());
+    let _group_anagrams = group_anagrams(vec!["".to_string()]);
 }
 
 fn test_this(str: &str) -> String {
@@ -356,7 +358,7 @@ fn is_isomorphic(s: String, t: String) -> bool {
 }
 
 fn word_pattern(pattern: String, s: String) -> bool {
-    let words: Vec<&str> = s.split(" ").collect();
+    let words: Vec<&str> = s.split(' ').collect();
 
     if words.len() != pattern.len() {
         return false;
@@ -389,6 +391,48 @@ fn word_pattern(pattern: String, s: String) -> bool {
     }
 
     result
+}
+
+fn is_anagram(s: String, t: String) -> bool {
+    let mut s_map: HashMap<char, i32> = HashMap::new();
+
+    for s_char in s.chars() {
+        *s_map.entry(s_char).or_insert(0) += 1;
+    }
+
+    for t_char in t.chars() {
+        *s_map.entry(t_char).or_insert(0) -= 1;
+    }
+
+    for e in s_map.values() {
+        if *e != 0 {
+            return false;
+        }
+    }
+
+    true
+}
+
+fn group_anagrams(strs: Vec<String>) -> Vec<Vec<String>> {
+    if strs.len() == 1 {
+        return vec![strs];
+    }
+
+    let mut str_map: HashMap<Vec<char>, Vec<String>> = HashMap::new();
+
+    for word in strs.iter() {
+        let mut ascii_sum: Vec<char> = word.chars().collect();
+        ascii_sum.sort();
+
+        str_map
+            .entry(ascii_sum)
+            .and_modify(|v| {
+                v.push(word.to_string());
+            })
+            .or_insert_with(|| vec![word.to_string()]);
+    }
+
+    str_map.values().cloned().collect()
 }
 
 #[cfg(test)]
@@ -628,5 +672,54 @@ mod tests {
         assert!(result);
         assert!(!result_two);
         assert!(!result_three);
+    }
+
+    #[test]
+    fn test_is_anagram() {
+        let s = String::from("anagram");
+        let t = String::from("nagaram");
+        let s_two = String::from("rat");
+        let t_two = String::from("car");
+
+        let result = is_anagram(s, t);
+        let result_two = is_anagram(s_two, t_two);
+
+        assert!(result);
+        assert!(!result_two);
+    }
+
+    #[test]
+    fn test_group_anagrams() {
+        // let strs = Vec::from([
+        //     "eat".to_string(),
+        //     "tea".to_string(),
+        //     "tan".to_string(),
+        //     "ate".to_string(),
+        //     "nat".to_string(),
+        //     "bat".to_string(),
+        // ]);
+        // let strs_two = Vec::from(["".to_string()]);
+        // let strs_three = Vec::from(["a".to_string()]);
+        let strs_four = Vec::from(["".to_string(), "b".to_string()]);
+
+        // let result = group_anagrams(strs);
+        // let result_two = group_anagrams(strs_two);
+        // let result_three = group_anagrams(strs_three);
+        let result_four = group_anagrams(strs_four);
+        //
+        // assert_eq!(
+        //     result,
+        //     vec![
+        //         vec!["bat".to_string()],
+        //         vec!["tan".to_string(), "nat".to_string()],
+        //         vec!["tea".to_string(), "eat".to_string(), "ate".to_string(),],
+        //     ]
+        // );
+        // assert_eq!(result_two, vec![vec!["".to_string()]]);
+        // assert_eq!(result_three, vec![vec!["a".to_string()]]);
+        assert_ne!(
+            result_four,
+            vec![vec!["b".to_string()], vec!["".to_string()]]
+        )
     }
 }
