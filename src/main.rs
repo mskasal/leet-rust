@@ -18,6 +18,7 @@ fn main() {
     let _word_pattern = word_pattern("abba".to_string(), "dog cat cat dog".to_string());
     let _is_anagram = is_anagram("anagram".to_string(), "nagaram".to_string());
     let _group_anagrams = group_anagrams(vec!["".to_string()]);
+    let _simplify_path = simplify_path("/home/".to_string());
 }
 
 fn test_this(str: &str) -> String {
@@ -435,6 +436,24 @@ fn group_anagrams(strs: Vec<String>) -> Vec<Vec<String>> {
     str_map.values().cloned().collect()
 }
 
+fn simplify_path(path: String) -> String {
+    let command_stack: Vec<&str> = path.split("/").collect();
+    let mut result: Vec<&str> = Vec::new();
+
+    for command in command_stack {
+        match command {
+            "." => {}
+            ".." => {
+                result.pop();
+            }
+            "" => {}
+            _ => result.push(command),
+        }
+    }
+
+    "/".to_string() + &result.join("/")
+}
+
 #[cfg(test)]
 mod tests {
 
@@ -721,5 +740,25 @@ mod tests {
             result_four,
             vec![vec!["b".to_string()], vec!["".to_string()]]
         )
+    }
+
+    #[test]
+    fn test_simplify_path() {
+        let path = String::from("/home/");
+        let result = simplify_path(path);
+
+        let path_two = String::from("/../");
+        let result_two = simplify_path(path_two);
+
+        let path_three = String::from("/home//foo/");
+        let result_three = simplify_path(path_three);
+
+        let path_four = String::from("/a/./b/../../c/");
+        let result_four = simplify_path(path_four);
+
+        assert_eq!(result, "/home".to_string());
+        assert_eq!(result_two, "/".to_string());
+        assert_eq!(result_three, "/home/foo".to_string());
+        assert_eq!(result_four, "/c".to_string());
     }
 }
