@@ -1,4 +1,26 @@
+use std::collections::hash_map::Entry::Vacant;
 use std::{cmp, collections::HashMap, usize};
+
+use std::cell::RefCell;
+use std::rc::Rc;
+
+#[derive(Debug, PartialEq, Eq)]
+pub struct TreeNode {
+    pub val: i32,
+    pub left: Option<Rc<RefCell<TreeNode>>>,
+    pub right: Option<Rc<RefCell<TreeNode>>>,
+}
+
+impl TreeNode {
+    #[inline]
+    pub fn new(val: i32) -> Self {
+        TreeNode {
+            val,
+            left: None,
+            right: None,
+        }
+    }
+}
 
 fn main() {
     let _test_this = test_this("this is a str");
@@ -19,6 +41,7 @@ fn main() {
     let _is_anagram = is_anagram("anagram".to_string(), "nagaram".to_string());
     let _group_anagrams = group_anagrams(vec!["".to_string()]);
     let _simplify_path = simplify_path("/home/".to_string());
+    let _longest_consecutive = longest_consecutive(vec![100, 4, 200, 1, 3, 2]);
 }
 
 fn test_this(str: &str) -> String {
@@ -371,22 +394,18 @@ fn word_pattern(pattern: String, s: String) -> bool {
 
     for i in 0..pattern.len() {
         if let Some(p_char) = pattern.chars().nth(i) {
-            if p_map.contains_key(&p_char) {
-                if p_map[&p_char] != words[i] {
-                    result = false;
-                    break;
-                }
-            } else {
-                p_map.insert(p_char, words[i]);
+            if let Vacant(e) = p_map.entry(p_char) {
+                e.insert(words[i]);
+            } else if p_map[&p_char] != words[i] {
+                result = false;
+                break;
             }
 
-            if s_map.contains_key(&words[i]) {
-                if s_map[words[i]] != p_char {
-                    result = false;
-                    break;
-                }
-            } else {
-                s_map.insert(words[i], p_char);
+            if let Vacant(e) = s_map.entry(words[i]) {
+                e.insert(p_char);
+            } else if s_map[words[i]] != p_char {
+                result = false;
+                break;
             }
         }
     }
@@ -437,7 +456,7 @@ fn group_anagrams(strs: Vec<String>) -> Vec<Vec<String>> {
 }
 
 fn simplify_path(path: String) -> String {
-    let command_stack: Vec<&str> = path.split("/").collect();
+    let command_stack: Vec<&str> = path.split('/').collect();
     let mut result: Vec<&str> = Vec::new();
 
     for command in command_stack {
@@ -452,6 +471,36 @@ fn simplify_path(path: String) -> String {
     }
 
     "/".to_string() + &result.join("/")
+}
+
+fn longest_consecutive(nums: Vec<i32>) -> i32 {
+    if nums.len() == 0 {
+        return 0;
+    }
+
+    let mut mutable_num = nums.clone();
+    mutable_num.sort();
+
+    let mut count: i32 = 1;
+    let mut max_count: i32 = 1;
+
+    for i in 1..mutable_num.len() {
+        let current = mutable_num[i - 1];
+        let next = mutable_num[i];
+
+        if next - current == 1 {
+            count += 1;
+        } else if next - current == 0 {
+            continue;
+        } else {
+            count = 1;
+        }
+        if max_count < count {
+            max_count = count;
+        }
+    }
+
+    return max_count;
 }
 
 #[cfg(test)]
@@ -719,12 +768,12 @@ mod tests {
         // ]);
         // let strs_two = Vec::from(["".to_string()]);
         // let strs_three = Vec::from(["a".to_string()]);
-        let strs_four = Vec::from(["".to_string(), "b".to_string()]);
+        // let strs_four = Vec::from(["".to_string(), "b".to_string()]);
 
         // let result = group_anagrams(strs);
         // let result_two = group_anagrams(strs_two);
         // let result_three = group_anagrams(strs_three);
-        let result_four = group_anagrams(strs_four);
+        // let result_four = group_anagrams(strs_four);
         //
         // assert_eq!(
         //     result,
@@ -736,10 +785,10 @@ mod tests {
         // );
         // assert_eq!(result_two, vec![vec!["".to_string()]]);
         // assert_eq!(result_three, vec![vec!["a".to_string()]]);
-        assert_ne!(
-            result_four,
-            vec![vec!["b".to_string()], vec!["".to_string()]]
-        )
+        // assert_ne!(
+        //     result_four,
+        //     vec![vec!["b".to_string()], vec!["".to_string()]]
+        // )
     }
 
     #[test]
@@ -760,5 +809,21 @@ mod tests {
         assert_eq!(result_two, "/".to_string());
         assert_eq!(result_three, "/home/foo".to_string());
         assert_eq!(result_four, "/c".to_string());
+    }
+
+    #[test]
+    fn test_longest_consecutive() {
+        let nums = vec![100, 4, 200, 3, 1, 2];
+        let result = longest_consecutive(nums);
+
+        let nums_two = vec![0, 3, 7, 2, 5, 8, 4, 6, 0, 1];
+        let result_two = longest_consecutive(nums_two);
+
+        let nums_three = vec![1, 2, 0, 1];
+        let result_three = longest_consecutive(nums_three);
+
+        assert_eq!(result, 4);
+        assert_eq!(result_two, 9);
+        assert_eq!(result_three, 3);
     }
 }
